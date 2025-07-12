@@ -7,6 +7,9 @@ import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UsersService {
+  update(id: number, arg1: { name: string; }) {
+      throw new Error('Method not implemented.');
+  }
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,

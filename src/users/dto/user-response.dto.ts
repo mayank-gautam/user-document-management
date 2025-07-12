@@ -17,10 +17,10 @@ export class UserResponseDto {
   createdAt: Date;
 
   @Exclude()
-  password: string;
+  password?: string;
 
   @Exclude()
-  refreshToken: string | null;
+  refreshToken?: string | null;
 
   constructor(partial: Partial<UserResponseDto>) {
     Object.assign(this, partial);

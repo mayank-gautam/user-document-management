@@ -22,9 +22,10 @@ export class AuthService {
 
     const hashed = await bcrypt.hash(dto.password, 10);
     const validRoles = ['admin', 'editor', 'viewer'];
-    const roles = dto.roles?.filter((role) => validRoles.includes(role)) ?? [
-      'viewer',
-    ];
+    const filteredRoles = dto.roles?.filter(role => validRoles.includes(role)) ?? [];
+
+    const roles = filteredRoles.length > 0 ? filteredRoles : ['viewer'];
+
 
     const user = await this.usersService.create({
       ...dto,

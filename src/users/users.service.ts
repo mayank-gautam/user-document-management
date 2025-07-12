@@ -34,6 +34,13 @@ export class UsersService {
     return this.userRepo.save(user);
   }
 
+  async updateRefreshToken(userId: number, hashedToken: string | null) {
+    const user = await this.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    user.refreshToken = hashedToken;
+    return this.userRepo.save(user);
+  }
+
   async delete(id: number) {
     return this.userRepo.delete(id);
   }

@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -16,6 +16,10 @@ export class User {
 
   @Column('simple-array')
   roles: string[];
+
+  @Column({ type: 'text', nullable: true })
+  refreshToken: string | null;
+
 
   @CreateDateColumn()
   createdAt: Date;

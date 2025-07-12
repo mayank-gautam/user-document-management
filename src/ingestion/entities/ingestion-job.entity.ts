@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Document } from '../../documents/document.entity';
 
-@Entity()
+@Entity('ingestion_job')
 export class IngestionJob {
   @PrimaryGeneratedColumn()
   id: number;

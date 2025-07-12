@@ -1,33 +1,41 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserResponseDto } from './dto/user-response.dto';
 import { plainToInstance } from 'class-transformer';
+import { error } from 'console';
 
 @Injectable()
 export class UsersService {
-  update(id: number, arg1: { name: string; }) {
-      throw new Error('Method not implemented.');
-  }
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-  ) {}
+  ) { }
 
   async create(user: Partial<User>): Promise<UserResponseDto> {
+    const existingUser = await this.userRepo.findOne({ where: { email: user.email } });
+
+    if (existingUser) {
+      throw new ConflictException('Email already exists');
+    }
+
     const newUser = this.userRepo.create(user);
     const savedUser = await this.userRepo.save(newUser);
-    return plainToInstance(UserResponseDto, savedUser);
+    return plainToInstance(UserResponseDto, savedUser, { excludeExtraneousValues: true });
   }
+
 
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepo.findOne({ where: { email } });
   }
 
-  async findById(id: number): Promise<UserResponseDto | null> {
+  async findById(id: number): Promise<UserResponseDto> {
     const user = await this.userRepo.findOne({ where: { id } });
-    return user ? plainToInstance(UserResponseDto, user) : null;
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return plainToInstance(UserResponseDto, user, { excludeExtraneousValues: true });
   }
 
   async findAll(): Promise<UserResponseDto[]> {

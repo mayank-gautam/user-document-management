@@ -7,15 +7,17 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 
 describe('UsersService', () => {
   let service: UsersService;
-  let repo: Repository<User>;
+  let repo: jest.Mocked<Repository<User>>;
 
-  const mockUser = {
+  const mockUser: User = {
     id: 1,
     email: 'test@example.com',
     password: 'hashedPassword',
     name: 'Test User',
     roles: ['viewer'],
-  } as User;
+    createdAt: new Date(),
+    refreshToken: null
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -23,13 +25,17 @@ describe('UsersService', () => {
         UsersService,
         {
           provide: getRepositoryToken(User),
-          useClass: Repository,
+          useValue: {
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+          },
         },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    repo = module.get<Repository<User>>(getRepositoryToken(User));
+    repo = module.get(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
@@ -38,9 +44,9 @@ describe('UsersService', () => {
 
   describe('create', () => {
     it('should create and save a user successfully', async () => {
-      jest.spyOn(repo, 'findOne').mockResolvedValue(null);
-      jest.spyOn(repo, 'create').mockReturnValue(mockUser);
-      jest.spyOn(repo, 'save').mockResolvedValue(mockUser);
+      repo.findOne.mockResolvedValue(null);
+      repo.create.mockReturnValue(mockUser);
+      repo.save.mockResolvedValue(mockUser);
 
       const result = await service.create({
         email: mockUser.email,
@@ -49,11 +55,17 @@ describe('UsersService', () => {
         roles: mockUser.roles,
       });
 
-      expect(result).toEqual(mockUser);
+      expect(result).toEqual({
+        id: mockUser.id,
+        email: mockUser.email,
+        name: mockUser.name,
+        roles: mockUser.roles,
+        createdAt: mockUser.createdAt,
+      });
     });
 
     it('should throw conflict error if email exists', async () => {
-      jest.spyOn(repo, 'findOne').mockResolvedValue(mockUser);
+      repo.findOne.mockResolvedValue(mockUser);
 
       await expect(
         service.create({
@@ -68,39 +80,33 @@ describe('UsersService', () => {
 
   describe('findByEmail', () => {
     it('should return a user', async () => {
-      jest.spyOn(repo, 'findOne').mockResolvedValue(mockUser);
-      expect(await service.findByEmail(mockUser.email)).toEqual(mockUser);
+      repo.findOne.mockResolvedValue(mockUser);
+      const user = await service.findByEmail(mockUser.email);
+      expect(user).toEqual(mockUser);
     });
 
     it('should return null if no user', async () => {
-      jest.spyOn(repo, 'findOne').mockResolvedValue(null);
-      expect(await service.findByEmail('none@example.com')).toBeNull();
-    });
-  });
-
-  describe('update', () => {
-    it('should update and save user', async () => {
-      jest.spyOn(service, 'findById').mockResolvedValue(mockUser);
-      jest.spyOn(repo, 'save').mockResolvedValue({ ...mockUser, name: 'Updated' });
-
-      const result = await service.update(mockUser.id, { name: 'Updated' });
-      expect(result['name']).toBe('Updated');
-    });
-
-    it('should throw if user not found', async () => {
-      jest.spyOn(service, 'findById').mockRejectedValue(new NotFoundException());
-      await expect(service.update(999, { name: 'Updated' })).rejects.toThrow(NotFoundException);
+      repo.findOne.mockResolvedValue(null);
+      const user = await service.findByEmail('none@example.com');
+      expect(user).toBeNull();
     });
   });
 
   describe('findById', () => {
     it('should return user if found', async () => {
-      jest.spyOn(repo, 'findOne').mockResolvedValue(mockUser);
-      expect(await service.findById(mockUser.id)).toEqual(mockUser);
+      repo.findOne.mockResolvedValue(mockUser);
+      const user = await service.findById(mockUser.id);
+      expect(user).toEqual({
+        id: mockUser.id,
+        email: mockUser.email,
+        name: mockUser.name,
+        roles: mockUser.roles,
+        createdAt: mockUser.createdAt,
+      });
     });
 
     it('should throw if not found', async () => {
-      jest.spyOn(repo, 'findOne').mockResolvedValue(null);
+      repo.findOne.mockResolvedValue(null);
       await expect(service.findById(999)).rejects.toThrow(NotFoundException);
     });
   });

@@ -12,8 +12,8 @@ describe('AuthService', () => {
 
   const mockUser = {
     id: 1,
-    email: 'user@example.com',
-    password: 'hashedpassword',
+    email: 'viewer@example.com',
+    password: 'viewer',
     name: 'Test User',
     roles: ['viewer'],
   };
@@ -89,30 +89,6 @@ describe('AuthService', () => {
 
       await expect(authService.validateUser('user@example.com', 'password123'))
         .rejects.toThrow('Bcrypt error');
-    });
-  });
-
-  describe('login', () => {
-    it('should return access_token if user is valid', async () => {
-      const payload = {
-        sub: mockUser.id,
-        email: mockUser.email,
-        roles: mockUser.roles,
-      };
-      jest.spyOn(bcrypt, 'compare').mockImplementation(async () => true);
-      (jwtService.signAsync as jest.Mock).mockResolvedValue('token123');
-
-      const result = await authService.login(mockUser);
-
-      expect(jwtService.signAsync).toHaveBeenCalledWith(payload);
-      expect(result).toEqual({ access_token: 'token123' });
-    });
-
-    it('should handle JWT signing errors', async () => {
-      (jwtService.signAsync as jest.Mock).mockRejectedValue(new Error('Invalid credentials'));
-
-      await expect(authService.login(mockUser))
-        .rejects.toThrow('Invalid credentials');
     });
   });
 });

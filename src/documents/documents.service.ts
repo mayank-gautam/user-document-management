@@ -18,8 +18,14 @@ export class DocumentsService {
   }
 
   async findAll(): Promise<DocumentResponseDto[]> {
-    const docs = await this.docRepo.find({ relations: ['owner'] });
-    return plainToInstance(DocumentResponseDto, docs, { excludeExtraneousValues: true });
+    const docs = await this.docRepo.find({
+      relations: ['owner'],
+      order: { uploadedAt: 'DESC' },
+    });
+
+    return plainToInstance(DocumentResponseDto, docs, {
+      excludeExtraneousValues: true,
+    });
   }
 
   async findById(id: number): Promise<DocumentResponseDto> {

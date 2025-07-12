@@ -56,9 +56,9 @@ describe('DocumentsService', () => {
   });
 
   describe('create', () => {
-    it('should create and save document', async () => {
-      (repo.create as jest.Mock).mockReturnValue(mockDoc);
-      (repo.save as jest.Mock).mockResolvedValue(mockDoc);
+    it('should create and save a document', async () => {
+      repo.create.mockReturnValue(mockDoc);
+      repo.save.mockResolvedValue(mockDoc);
 
       const result = await service.create('Doc 1', 'file.pdf', mockUser.id);
 
@@ -75,7 +75,7 @@ describe('DocumentsService', () => {
 
   describe('findById', () => {
     it('should return document if found', async () => {
-      (repo.findOne as jest.Mock).mockResolvedValue(mockDoc);
+      repo.findOne.mockResolvedValue(mockDoc);
 
       const result = await service.findById(mockDoc.id);
 
@@ -85,52 +85,51 @@ describe('DocumentsService', () => {
       });
 
       expect(result).toMatchObject({
-        id: 1,
-        title: 'Doc 1',
-        filename: 'file.pdf',
+        id: mockDoc.id,
+        title: mockDoc.title,
+        filename: mockDoc.filename,
         owner: {
-          id: 1,
-          email: 'user@example.com',
-          roles: ['viewer'],
+          id: mockUser.id,
+          email: mockUser.email,
+          roles: mockUser.roles,
         },
       });
     });
 
-    it('should throw if not found', async () => {
-      (repo.findOne as jest.Mock).mockResolvedValue(null);
+    it('should throw NotFoundException if document not found', async () => {
+      repo.findOne.mockResolvedValue(null);
 
       await expect(service.findById(999)).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('update', () => {
-    it('should update title', async () => {
-      const updated = { ...mockDoc, title: 'Updated' };
-
-      (repo.update as jest.Mock).mockResolvedValue({ affected: 1 });
-      (repo.findOne as jest.Mock).mockResolvedValue(updated);
-
+    it('should update title and return updated document', async () => {
+      const updatedDoc = { ...mockDoc, title: 'Updated' };
+      repo.findOne.mockResolvedValue(mockDoc);
+      repo.save.mockResolvedValue(updatedDoc);
       const result = await service.update(mockDoc.id, 'Updated');
-
-      expect(repo.update).toHaveBeenCalledWith({ id: mockDoc.id }, { title: 'Updated' });
       expect(result.title).toBe('Updated');
     });
   });
 
+
+
   describe('delete', () => {
-    it('should delete document', async () => {
-      (repo.delete as jest.Mock).mockResolvedValue({ affected: 1, raw: {} });
+    it('should delete the document and return result', async () => {
+      const deleteResult = { affected: 1, raw: {} };
+      repo.delete.mockResolvedValue(deleteResult);
 
       const result = await service.delete(mockDoc.id);
 
       expect(repo.delete).toHaveBeenCalledWith(mockDoc.id);
-      expect(result).toEqual({ affected: 1, raw: {} });
+      expect(result).toEqual(deleteResult);
     });
   });
 
   describe('findAll', () => {
-    it('should return array of documents', async () => {
-      (repo.find as jest.Mock).mockResolvedValue([mockDoc]);
+    it('should return all documents sorted by uploadedAt DESC', async () => {
+      repo.find.mockResolvedValue([mockDoc]);
 
       const result = await service.findAll();
 
@@ -139,7 +138,22 @@ describe('DocumentsService', () => {
         order: { uploadedAt: 'DESC' },
       });
 
-      expect(result).toEqual([mockDoc]);
+      expect(result).toMatchObject([
+        {
+          id: mockDoc.id,
+          title: mockDoc.title,
+          filename: mockDoc.filename,
+          uploadedAt: mockDoc.uploadedAt,
+          owner: {
+            id: mockUser.id,
+            email: mockUser.email,
+            name: mockUser.name,
+            roles: mockUser.roles,
+            createdAt: mockUser.createdAt,
+          },
+        },
+      ]);
     });
   });
+
 });

@@ -10,24 +10,31 @@ import {
   UseInterceptors,
   UseGuards,
   Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { Request } from 'express';
 import { DocumentsService } from './documents.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { extname } from 'path';
-
 @Controller('documents')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin', 'editor')
 export class DocumentsController {
-  constructor(private readonly documentsService: DocumentsService) {}
+  constructor(private readonly documentsService: DocumentsService) { }
 
   @Post()
-  async create(@Body('title') title: string, @Req() req) {
-    return this.documentsService.create(title, 'pending', req.user.sub);
+  async create(@Body('title') title: string, @Req() req: Request) {
+    const user = req.user as { id?: number };
+
+    if (!user?.id) {
+      throw new UnauthorizedException('User ID missing from request');
+    }
+
+    return this.documentsService.create(title, 'pending', user.id);
   }
 
   @Post('upload/:id')

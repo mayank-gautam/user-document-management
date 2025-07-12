@@ -27,7 +27,7 @@ export class DocumentsService {
 
   async update(id: number, title: string) {
     const doc = await this.findById(id);
-    doc.title = title;
+      doc.title = title;
     return this.docRepo.save(doc);
   }
 

@@ -1,35 +1,44 @@
 # 📚 User Document Management – NestJS Backend
 
-A robust, modular backend system built with **NestJS** supporting:
+A scalable, production-ready backend system built with **NestJS**, featuring:
 
-- 🔐 JWT Authentication & Role-based Authorization (Admin, Editor, Viewer)
-- 📄 Document CRUD with ownership controls
-- ⚙️ Ingestion Job Triggering and Tracking
-- 🧪 70%+ Unit Test Coverage
+- 🔐 JWT Authentication & Role-based Authorization (`Admin`, `Editor`, `Viewer`)
+- 📄 Document CRUD with ownership and access control
+- ⚙️ Ingestion Job Triggering & Tracking
+- 🧪 70%+ Unit Test Coverage using **Jest**
 - 🧱 PostgreSQL with TypeORM
-- ✨ Modular & Scalable Architecture
+- ✨ Clean, Modular, and Extensible Architecture
 
 ---
 
-## ⚙️ Setup Instructions (Local without Docker)
+## 🚀 Features
+
+- ✅ Modular architecture with separation of concerns
+- ✅ Role-based access control using custom decorators
+- ✅ Guards for authentication and permissions
+- ✅ DTO validation with `class-validator`
+- ✅ JWT-based authentication with expiration
+- ✅ Fully unit tested services & controllers
+- ✅ PostgreSQL database integration with TypeORM
+
+---
+
+## ⚙️ Local Setup (Without Docker)
 
 ### 1️⃣ Clone the Repository
 
 ```bash
 git clone https://github.com/mayank-gautam/user-document-management.git
 cd user-document-management
+
 2️⃣ Install Dependencies
-bash
 npm install
 
-3️⃣ Configure Environment
-Create a .env file in the root directory.
-
-bash
+3️⃣ Environment Variables
+Create a .env file:
 cp .env.example .env
-Edit .env:
+Edit .env as per your local setup:
 
-env
 PORT=3000
 NODE_ENV=development
 
@@ -41,123 +50,103 @@ DB_DATABASE=udm_db
 
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRATION=3600s
-4️⃣ Setup PostgreSQL
-Make sure PostgreSQL is installed and running. Create a database:
 
-sql
+4️⃣ PostgreSQL Setup
+Ensure PostgreSQL is installed and running. Create the required database:
 CREATE DATABASE udm_db;
+
 5️⃣ Start the Server
-bash
 npm run start:dev
 API will be available at:
-👉 http://localhost:3000
-
-🚀 API Endpoints
-🔐 Auth APIs
-Method	Route	Description	Access
-POST	/auth/register	Register new user	Public
-POST	/auth/login	Login and get JWT	Public
-
-👤 User Management (Admin Only)
-Method	Route	Description
-GET	/users	List all users
-PATCH	/users/:id/role	Update user role
-
-📄 Document APIs
-Method	Route	Description	Access
-POST	/documents	Upload new document	Authenticated
-GET	/documents	List all documents	Viewer+
-GET	/documents/:id	Get specific document	Viewer+
-PATCH	/documents/:id	Update title	Owner Only
-DELETE	/documents/:id	Delete document	Owner Only
-
-⚙️ Ingestion APIs
-Method	Route	Description
-POST	/ingestion/trigger/:docId	Trigger ingestion job
-GET	/ingestion	List all ingestion jobs
-GET	/ingestion/:id	Get ingestion job by ID
-
-🧪 Running Tests
-Run all tests:
-
-bash
-npm run test
-Check test coverage:
-
-bash
-npm run test:cov
-✅ All modules are tested with Jest.
-Aim for at least 70%+ code coverage.
+📍 http://localhost:3000
 
 📂 Folder Structure
-bash
 src/
-├── auth/           # Register, login, JWT strategy
-├── users/          # User entity, roles, service
-├── documents/      # Document CRUD, access control
-├── ingestion/      # Ingestion job trigger & tracking
+├── auth/           # Login, Register, JWT Strategy
+├── users/          # User entity, roles, services
+├── documents/      # CRUD, ownership checks
+├── ingestion/      # Ingestion jobs (trigger + status)
 ├── common/         # Guards, interceptors, decorators
 ├── main.ts         # App bootstrap
 └── app.module.ts   # Root module
-📦 Packages Used
-@nestjs/jwt – JWT authentication
 
-@nestjs/typeorm – ORM integration
 
-bcrypt – Password hashing
+🔐 API Endpoints
+| Method | Route          | Description         | Access |
+| ------ | -------------- | ------------------- | ------ |
+| POST   | /auth/register | Register new user   | Public |
+| POST   | /auth/login    | Login and get token | Public |
 
-class-validator – DTO validation
+👤 Users (Admin Only)
+| Method | Route             | Description           |
+| ------ | ----------------- | --------------------- |
+| GET    | /users            | List all users        |
+| PATCH  | /users/\:id/roles | Update user roles     |
+| DELETE | /users/\:id       | Delete a user account |
 
-jest – Unit testing
+📄 Documents
+| Method | Route           | Description           | Access        |
+| ------ | --------------- | --------------------- | ------------- |
+| POST   | /documents      | Upload document       | Authenticated |
+| GET    | /documents      | List documents        | Viewer+       |
+| GET    | /documents/\:id | Get specific document | Viewer+       |
+| PATCH  | /documents/\:id | Update document title | Owner only    |
+| DELETE | /documents/\:id | Delete document       | Owner only    |
 
-pg – PostgreSQL driver
+⚙️ Ingestion
+| Method | Route                      | Description             |
+| ------ | -------------------------- | ----------------------- |
+| POST   | /ingestion/trigger/\:docId | Trigger ingestion job   |
+| GET    | /ingestion/jobs            | List all ingestion jobs |
+| GET    | /ingestion/jobs/\:id       | Get job by ID           |
 
-✨ Features
- Modular architecture (separate modules/services)
 
- Role-based access using custom decorators
+🧪 Running Tests
+npm run test
 
- Guards for authentication & authorization
 
- Fully unit tested modules
+📦 Dependencies Used
+@nestjs/common, @nestjs/core, @nestjs/typeorm, @nestjs/jwt
 
- DTO validation with class-validator
+bcrypt, class-validator, pg
 
- JWT Authentication with expiration
+jest (unit testing)
 
-📌 Optional Enhancements
-Swagger API Docs via @nestjs/swagger
+passport, passport-jwt, typeorm
 
-Seed script to generate 1000+ users & documents
+📘 Optional Enhancements
+✅ Swagger API docs using @nestjs/swagger
 
-Pagination and search in document listing
+✅ Rate limiting using @nestjs/throttler
 
-Rate limiting using @nestjs/throttler
+⏳ Pagination & search in document listing
 
-Logging with winston or pino
+⏳ Logging via winston or pino
 
-Inter-service communication (Microservices)
+⏳ Database seeding script for users/documents
 
-📝 Final Submission Checklist
-✅ Application runs locally without Docker
+⏳ Inter-service communication with microservices
 
-✅ Code is pushed to GitHub Repo
+✅ Submission Checklist
+ Application runs locally without Docker
 
-✅ .env.example provided
+ .env.example provided
 
-✅ At least 70% unit test coverage
+ Clean, modular folder structure
 
-✅ Modular structure with clean folder separation
+ Auth, Users, Documents, Ingestion APIs covered
 
-✅ Routes covered: Auth, Users, Documents, Ingestion
+ Unit tests implemented
 
-✅ README includes setup and API docs
+ Test coverage above 70%
 
-🔗 Submission Link
-📤 Submit your repository:
-https://github.com/mayank-gautam/user-document-management.git
+ README includes setup & API documentation
+
+ 🔗 Submission
+📤 GitHub Repo:
+https://github.com/mayank-gautam/user-document-management
+
 🙋 Need Help?
-If you want:
-
-Seed script to generate test users & documents
+To seed sample data:
 npm run seed
+```
